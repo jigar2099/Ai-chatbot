@@ -39,7 +39,7 @@ words = sorted(set(words))
 classes = sorted(set(classes))
 
 pickle.dump(words, open('words.pkl', 'wb'))
-pickle.dump(words, open('classes.pkl', 'wb'))
+pickle.dump(classes, open('classes.pkl', 'wb'))
 
 training = []
 output_empty = [0] * len(classes)
@@ -71,14 +71,22 @@ model.add(Dense(128, input_shape=(len(train_x[0]),), activation='relu'))
 model.add(Dropout(0.5))
 model.add(Dense(64, activation='relu'))
 model.add(Dropout(0.5))
-model.add(Dense(len(train_y[0]), activation='relu'))
+model.add(Dense(32, activation='relu'))
+#model.add(Dropout(0.5))
+model.add(Dense(16, activation='relu'))
+#model.add(Dropout(0.5))
+#model.add(Dense(8, activation='relu'))
+#model.add(Dropout(0.5))
+model.add(Dense(len(train_y[0]), activation='softmax'))
 
 #sgd = tf.keras.optimizers.SGD(lr=0.01, decay = 1e-6, momentum=0.9)
-model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['accuracy'])
+model.compile(loss='categorical_crossentropy', optimizer=tf.keras.optimizers.SGD(learning_rate=0.01, momentum=0.9),
+               metrics=['accuracy'])
 
-model.fit(np.array(train_x), np.array(train_y),
-          epochs=50,
-          batch_size=20,
+hist = model.fit(np.array(train_x), np.array(train_y),
+          epochs=700,
+          batch_size=32,
+          #validation_split = 0.2,
           verbose=1)
-model.save('catbot_model.h5')
+model.save('catbot_model.h5', hist)
 print('Done!')

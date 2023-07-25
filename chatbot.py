@@ -9,11 +9,11 @@ from nltk.stem import WordNetLemmatizer
 from tensorflow.keras.models import load_model
 
 lemmatizer = WordNetLemmatizer()
-intents = json.loads(open('intensts.json').read())
+intents = json.loads(open('intents.json').read())
 
-word = pickle.load(open('words.pkl', 'rb'))
+words = pickle.load(open('words.pkl', 'rb'))
 classes = pickle.load(open('classes.pkl', 'rb'))
-model = load_model('chatbot_model.h5')
+model = load_model(r'catbot_model.h5')
 
 def clean_up_sentence(sentence):
     sentence_words = nltk.word_tokenize(sentence)
@@ -31,10 +31,28 @@ def bag_of_words(sentence):
 
 def predict_class(sentence):
     bow = bag_of_words(sentence)
-    res = model.predict(np.array([bow]))[0]
+    res = model.predict(np.array([bow]), verbose=0)[0]
     ERR_THRESHOLD = 0.25
-    result = [[i, r] for i, r in enumerate(res) if r > ERR_THRESHOLD]
+    results = [[i, r] for i, r in enumerate(res) if r > ERR_THRESHOLD]
     results.sort(key=lambda x: x[1], reverse=True)
     return_list = []
     for r in results:
-        return_list.appen
+        return_list.append({'intent': classes[r[0]], 'probability' : str(r[1])})
+    return return_list
+
+def get_response(intents_list, intents_json):
+    tag = intents_list[0]['intent']
+    list_of_intents = intents_json['intents']
+    for i in list_of_intents:
+        if i['tag'] == tag:
+            result = random.choice(i['responses'])
+            break
+    return result
+
+print('Bot!!!!!!!!')
+
+while True:
+    message = input("")
+    ints = predict_class(message)
+    res = get_response( ints, intents)
+    print(res)
